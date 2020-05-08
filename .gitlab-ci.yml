@@ -1,0 +1,46 @@
+---
+stages:
+  - build
+  - test
+
+services:
+  - postgres:9.5
+
+variables:
+  POSTGRES_DB: passari_test
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: testpassword
+  POSTGRES_HOST: postgres
+  POSTGRES_VERSION: "9.5"
+
+build:
+  stage: build
+  image: $CI_REGISTRY/passari/passari-test-docker:latest
+  script:
+    - python3 setup.py sdist
+    - mv dist/*.tar.gz dist/${CI_PROJECT_NAME}.tar.gz
+  artifacts:
+    paths:
+      - dist/*.tar.gz
+
+test:
+  stage: test
+  image: $CI_REGISTRY/passari/passari-test-docker:latest
+  script:
+    - export LANG=en_US.UTF-8
+    - export LC_ALL=en_US.UTF-8
+    - python3.6 -mvenv .venv
+    - . .venv/bin/activate
+    # Install passari-workflow
+    - pip install .
+    # Install passari
+    - "curl --location --header \"PRIVATE-TOKEN: ${GITLAB_API_TOKEN}\" -o passari.tar.gz 'https://museopas-gitlab.northeurope.cloudapp.azure.com/api/v4/projects/passari%2Fpassari/jobs/artifacts/master/raw/dist/passari.tar.gz?job=build'"
+    - pip install passari.tar.gz
+    # Install testing tools and run tests
+    - pip install -r requirements_dev.txt
+    - pytest
+      --postgresql-host $POSTGRES_HOST
+      --postgresql-user $POSTGRES_USER
+      --postgresql-port 5432
+      -vv --cov passari_workflow
+  coverage: '/TOTAL.*\s+(\d+%)$/'
