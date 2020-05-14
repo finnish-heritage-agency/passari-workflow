@@ -19,9 +19,22 @@ setup(
     include_package_data=True,
     package_dir={"passari_workflow": "src/passari_workflow"},
     install_requires=[
-        "click", "toml", "SQLAlchemy", "psycopg2", "rq", "redis",
-        "python-redis-lock", "alembic", "requests"
+        "click>=7", "click<8",
+        "toml",
+        "SQLAlchemy",
+        "psycopg2",
+        "rq>=1",
+        "python-redis-lock",
+        "alembic",
+        "requests"
     ],
+    classifiers=[
+        "Development Status :: 5 - Production/Stable",
+        "Operating System :: POSIX :: Linux",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6"
+    ],
+    python_requires=">=3.6",
     entry_points={
         "console_scripts": [
             "sync-objects = passari_workflow.scripts.sync_objects:cli",
