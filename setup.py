@@ -23,7 +23,10 @@ setup(
         "toml",
         "SQLAlchemy",
         "psycopg2",
-        "rq>=1",
+        # Pinned to 1.4.0 due to hmset bug:
+        # https://github.com/rq/rq/issues/1256
+        # "rq>=1",
+        "rq==1.4.0",
         "python-redis-lock",
         "alembic",
         "requests"
