@@ -15,6 +15,15 @@ source venv/bin/activate
 pip install .
 ```
 
+Documentation
+-------------
+
+Documentation can be generated using Sphinx by running the following command:
+
+```
+python setup.py build_sphinx
+```
+
 Workflow process
 ----------------
 

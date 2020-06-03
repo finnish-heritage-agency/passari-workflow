@@ -1,6 +1,7 @@
 from setuptools import setup, find_packages
 
 
+NAME = "passari_workflow"
 DESCRIPTION = (
     "MuseumPlus digital preservation workflow"
 )
@@ -10,7 +11,7 @@ AUTHOR_EMAIL = "janne.pulkkinen@museovirasto.fi"
 
 
 setup(
-    name="passari_workflow",
+    name=NAME,
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     author=AUTHOR,
@@ -63,6 +64,15 @@ setup(
             "passari_workflow.scripts.dip_tool:cli"
         ]
     },
+    command_options={
+        "build_sphinx": {
+            "project": ("setup.py", NAME),
+            "source_dir": ("setup.py", "docs")
+        }
+    },
     use_scm_version=True,
-    setup_requires=["setuptools_scm"]
+    setup_requires=["setuptools_scm", "sphinx", "sphinxcontrib-apidoc"],
+    extras_require={
+        "sphinx": ["sphinxcontrib-apidoc"]
+    }
 )
