@@ -12,7 +12,7 @@ To get started, ensure that Python 3.6+ is installed. On CentOS 7, you can usual
 
 Clone the *passari-workflow* repository and create a Python 3.6 virtualenv. Install *Passari* first and configure it; after this you can install *Passari Workflow* in the same *virtualenv*.
 
-.. note::
+.. warning::
 
    You can install *Passari Workflow* with pip without cloning the repository, but you won't be able to perform database migrations without it.
 

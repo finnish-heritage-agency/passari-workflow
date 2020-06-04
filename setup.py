@@ -47,7 +47,6 @@ setup(
             "passari_workflow.scripts.sync_attachments:cli",
             "sync-hashes = "
             "passari_workflow.scripts.sync_hashes:cli",
-            "create-pas-db = passari_workflow.scripts.create_pas_db:cli",
             "enqueue-objects = passari_workflow.scripts.enqueue_objects:cli",
             "sync-processed-sips = "
             "passari_workflow.scripts.sync_processed_sips:cli",

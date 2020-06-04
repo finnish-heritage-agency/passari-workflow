@@ -15,6 +15,8 @@ source venv/bin/activate
 pip install .
 ```
 
+See the documentation for further details on configuring the workflow.
+
 Documentation
 -------------
 
