@@ -48,6 +48,8 @@ setup(
             "sync-hashes = "
             "passari_workflow.scripts.sync_hashes:cli",
             "enqueue-objects = passari_workflow.scripts.enqueue_objects:cli",
+            "deferred-enqueue-objects = "
+            "passari_workflow.scripts.deferred_enqueue_objects:cli",
             "sync-processed-sips = "
             "passari_workflow.scripts.sync_processed_sips:cli",
             "reenqueue-object = "

@@ -8,9 +8,8 @@ from passari_workflow.db import scoped_session
 from passari_workflow.db.connection import connect_db
 from passari_workflow.db.models import MuseumObject
 from passari_workflow.jobs.download_object import download_object
-from passari_workflow.queue.queues import (QueueType,
-                                                  get_enqueued_object_ids,
-                                                  get_queue, lock_queues)
+from passari_workflow.queue.queues import (QueueType, get_enqueued_object_ids,
+                                           get_queue, lock_queues)
 
 
 def enqueue_object(object_id):

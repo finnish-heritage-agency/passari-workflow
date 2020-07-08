@@ -14,7 +14,7 @@ from sqlalchemy.sql.functions import coalesce
 
 from passari.dpres.package import get_archive_path_parts
 from passari_workflow.config import (ARCHIVE_DIR, PACKAGE_DIR,
-                                            PRESERVATION_DELAY, UPDATE_DELAY)
+                                     PRESERVATION_DELAY, UPDATE_DELAY)
 
 Base = declarative_base(
     metadata=MetaData(

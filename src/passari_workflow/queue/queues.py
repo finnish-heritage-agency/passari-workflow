@@ -18,6 +18,7 @@ class QueueType(Enum):
     CREATE_SIP = "create_sip"
     SUBMIT_SIP = "submit_sip"
     CONFIRM_SIP = "confirm_sip"
+    ENQUEUE_OBJECTS = "enqueue_objects"
 
 
 class WorkflowQueue(Queue):

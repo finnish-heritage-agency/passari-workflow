@@ -1,10 +1,9 @@
 import pytest
 from passari_workflow.db.models import (FreezeSource, MuseumObject,
-                                               MuseumPackage)
+                                        MuseumPackage)
 from passari_workflow.exceptions import WorkflowJobRunningError
 from passari_workflow.queue.queues import QueueType, get_queue
-from passari_workflow.scripts.freeze_objects import \
-    cli as freeze_objects_cli
+from passari_workflow.scripts.freeze_objects import cli as freeze_objects_cli
 from rq import SimpleWorker
 from rq.registry import StartedJobRegistry
 
