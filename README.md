@@ -44,7 +44,7 @@ The workflow consists of the following scripts in the described order. A few of 
 * `sync_hashes`
   * The script updates the database with data collected using `sync_objects` and `sync_attachments`, and determine which objects can be enqueued into the preservation workflow.
   * The script is designed to be called **automatically (eg. once a day)**.
-* `enqueue_objects`
+* `enqueue_objects` or `deferred_enqueue_objects`
   * The script checks the local database for objects and their modification dates. If there are objects that haven't been preserved, or objects that have been preserved and updated recently, preservation tasks will be enqueued for those objects.
   * The script is designed to be called **manually by an administrator**, who will also determine how many objects to enqueue at once. For example, the administrator might start with a small number of objects to determine the amount of time it takes to submit those objects to the digital preservation service, how many of them fail in the preservation process and how long it takes for the digital preservation service to process the submitted packages.
   * The script enqueues a given number of `download_object` tasks.

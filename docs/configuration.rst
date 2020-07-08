@@ -108,7 +108,11 @@ For example, you could run the scripts off-hours using the following schedule:
 Configuring RQ workers
 ----------------------
 
-*Passari Workflow* uses a job queue called `RQ <https://python-rq.org/>`_ to automatically process objects. The job queue consists of four different queues: ``download_object``, ``create_sip``, ``submit_sip`` and ``confirm_sip``.
+*Passari Workflow* uses a job queue called `RQ <https://python-rq.org/>`_ to automatically process objects. The job queue consists of five different queues: ``download_object``, ``create_sip``, ``submit_sip``, ``confirm_sip`` and ``enqueue_objects``.
+
+.. note::
+
+  The last queue ``enqueue_objects`` is used for enqueuing objects in an asychronous way, which is useful when enqueuing objects in the web UI. This queue only needs one worker.
 
 You can get started by creating a RQ configuration file called `worker_config.py` in the same directory as *passari-workflow* with the following contents:
 
