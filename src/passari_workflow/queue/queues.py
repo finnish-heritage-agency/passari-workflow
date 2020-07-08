@@ -26,6 +26,14 @@ class WorkflowQueue(Queue):
     DEFAULT_TIMEOUT = 14400
 
 
+OBJECT_QUEUE_TYPES = [
+    QueueType.DOWNLOAD_OBJECT,
+    QueueType.CREATE_SIP,
+    QueueType.SUBMIT_SIP,
+    QueueType.CONFIRM_SIP
+]
+
+
 def job_id_to_object_id(job_id):
     """
     Extract the object ID from a RQ job ID
@@ -73,8 +81,8 @@ def delete_jobs_for_object_id(object_id):
 
 def get_enqueued_object_ids():
     """
-    Get object IDs from every queue including every pending, executing and
-    failed job.
+    Get object IDs from every object-related queue including every pending,
+    executing and failed job.
 
     This can be used to determine which jobs can be enqueued without
     risk of duplicates
@@ -83,7 +91,7 @@ def get_enqueued_object_ids():
 
     registry_types = (StartedJobRegistry, FailedJobRegistry)
 
-    for queue_type in QueueType:
+    for queue_type in OBJECT_QUEUE_TYPES:
         queue = get_queue(queue_type)
 
         # Retrieve started and failed jobs
@@ -111,7 +119,7 @@ def get_running_object_ids():
     """
     object_ids = set()
 
-    for queue_type in QueueType:
+    for queue_type in OBJECT_QUEUE_TYPES:
         queue = get_queue(queue_type)
 
         job_registry = StartedJobRegistry(queue=queue)
@@ -133,7 +141,7 @@ def get_object_id2queue_map(object_ids):
     queue_object_ids = defaultdict(set)
     queue_map = {}
 
-    for queue_type in QueueType:
+    for queue_type in OBJECT_QUEUE_TYPES:
         queue = get_queue(queue_type)
         started_registry = StartedJobRegistry(queue=queue)
         job_ids = started_registry.get_job_ids() + queue.get_job_ids()
@@ -155,7 +163,9 @@ def get_object_id2queue_map(object_ids):
                 queue_object_ids["failed"].add(object_id)
 
     # Check for all queues plus the catch-all failed queue
-    queue_names = [queue_type.value for queue_type in QueueType] + ["failed"]
+    queue_names = [
+        queue_type.value for queue_type in OBJECT_QUEUE_TYPES
+    ] + ["failed"]
 
     for object_id in object_ids:
         queue_map[object_id] = []
