@@ -1,15 +1,17 @@
 import datetime
 import errno
 
+from passari.exceptions import PreservationError
 from passari.scripts.download_object import main
 from passari_workflow.config import PACKAGE_DIR
-from passari_workflow.db import DBSession, scoped_session
+from passari_workflow.db import scoped_session
 from passari_workflow.db.connection import connect_db
 from passari_workflow.db.models import (MuseumAttachment, MuseumObject,
-                                               MuseumPackage)
+                                        MuseumPackage)
 from passari_workflow.db.utils import bulk_create_or_get
 from passari_workflow.jobs.create_sip import create_sip
-from passari_workflow.jobs.utils import job_locked_by_object_id
+from passari_workflow.jobs.utils import (freeze_running_object,
+                                         job_locked_by_object_id)
 from passari_workflow.queue.queues import QueueType, get_queue
 
 
@@ -34,6 +36,14 @@ def download_object(object_id):
             # filename of the SIP is correct before it is created.
             sip_id=sip_id
         )
+    except PreservationError as exc:
+        # If a PreservationError was raised, freeze the object
+        freeze_running_object(
+            object_id=object_id,
+            sip_id=sip_id,
+            freeze_reason=exc.error
+        )
+        return
     except OSError as exc:
         if exc.errno == errno.ENOSPC:
             raise OSError(

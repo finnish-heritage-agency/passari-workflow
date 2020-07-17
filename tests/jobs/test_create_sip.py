@@ -68,15 +68,15 @@ def create_sip(monkeypatch, create_sip_call, museum_packages_dir, archive_dir):
         mock_create_sip
     )
     monkeypatch.setattr(
-        "passari_workflow.jobs.create_sip.PACKAGE_DIR",
+        "passari_workflow.jobs.utils.PACKAGE_DIR",
         str(museum_packages_dir)
     )
     monkeypatch.setattr(
-        "passari_workflow.jobs.create_sip.ARCHIVE_DIR",
+        "passari_workflow.jobs.utils.ARCHIVE_DIR",
         str(archive_dir)
     )
     monkeypatch.setattr(
-        "passari_workflow.jobs.create_sip.MuseumObjectPackage"
+        "passari_workflow.jobs.utils.MuseumObjectPackage"
         ".from_path_sync",
         mock_from_path_sync
     )

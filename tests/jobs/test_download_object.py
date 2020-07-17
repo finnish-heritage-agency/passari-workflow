@@ -2,7 +2,8 @@ import datetime
 from collections import namedtuple
 
 import pytest
-from passari_workflow.db.models import MuseumObject, MuseumPackage
+from passari.exceptions import PreservationError
+from passari_workflow.db.models import FreezeSource, MuseumObject
 from passari_workflow.queue.queues import QueueType, get_queue
 
 MockMuseumPackage = namedtuple(
@@ -19,7 +20,7 @@ TEST_DATE = datetime.datetime(
 
 
 @pytest.fixture(scope="function")
-def download_object(monkeypatch):
+def download_object(monkeypatch, museum_packages_dir):
     def mock_download_object(object_id, package_dir, sip_id=None):
         sip_id = f"-{sip_id}" if sip_id else ""
         sip_filename = f"fake_package{sip_id}.tar"
@@ -38,6 +39,11 @@ def download_object(monkeypatch):
         "passari_workflow.jobs.download_object.main",
         mock_download_object
     )
+    monkeypatch.setattr(
+        "passari_workflow.jobs.utils.PACKAGE_DIR",
+        str(museum_packages_dir)
+    )
+
 
     from passari_workflow.jobs.download_object import download_object
     yield download_object
@@ -123,3 +129,64 @@ def test_museum_package_identical_disallowed(
         "Package with filename fake_package-20190101-120000.tar "
         "already exists"
     ) in str(exc.value)
+
+
+def test_preservation_error(
+        session, download_object, monkeypatch, museum_packages_dir,
+        archive_dir, museum_object, museum_package_factory):
+    """
+    Test that encountering a PreservationError during a 'download_object'
+    job will freeze the object and remove the object from the workflow
+    """
+    def mock_download_object(object_id, package_dir, sip_id):
+        raise PreservationError(
+            detail="Mock detailed error message",
+            error="Filename was not supported"
+        )
+
+    # Create the fake museum package directory
+    (museum_packages_dir / "123456" / "sip").mkdir(parents=True)
+
+    monkeypatch.setattr(
+        "passari_workflow.jobs.download_object.main",
+        mock_download_object
+    )
+
+    # Create a museum package that was uploaded successfully earlier.
+    # The PreservationError should *not* affect this package.
+    db_museum_package = museum_package_factory(
+        sip_filename="fake_package-testID2.tar",
+        created_date=datetime.datetime(
+            2018, 9, 1, 12, 0, 0, 0, tzinfo=datetime.timezone.utc
+        ),
+        preserved=True,
+        museum_object=museum_object
+    )
+    museum_object.latest_package = db_museum_package
+
+    session.commit()
+
+    download_object(123456)
+
+    # Database should be updated
+    db_museum_object = session.query(MuseumObject).get(123456)
+
+    assert db_museum_object.frozen
+    assert db_museum_object.freeze_reason == "Filename was not supported"
+    assert db_museum_object.freeze_source == FreezeSource.AUTOMATIC
+
+    # The previous successful package was not updated.
+    # This is because a new package is not created unless the 'download_object'
+    # job is successful
+    latest_package = db_museum_object.latest_package
+
+    assert not latest_package.cancelled
+    assert latest_package.preserved
+    assert latest_package.sip_filename == "fake_package-testID2.tar"
+
+    # No new job was enqueued
+    queue = get_queue(QueueType.CREATE_SIP)
+    assert not queue.job_ids
+
+    # The museum package directory was deleted
+    assert not (museum_packages_dir / "123456").is_dir()

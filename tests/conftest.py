@@ -204,6 +204,7 @@ def museum_package_factory(session):
 def museum_package(session, museum_object, museum_package_factory):
     museum_package = museum_package_factory(
         sip_filename="fake_package-testID.tar",
+        sip_id="testID",
         museum_object=museum_object
     )
     museum_object.latest_package = museum_package

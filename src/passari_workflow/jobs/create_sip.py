@@ -1,19 +1,15 @@
-import datetime
 import errno
-import shutil
-from pathlib import Path
 
 from passari.exceptions import PreservationError
 from passari.scripts.create_sip import main
-from passari_workflow.config import PACKAGE_DIR, ARCHIVE_DIR
+from passari_workflow.config import PACKAGE_DIR
 from passari_workflow.db import scoped_session
 from passari_workflow.db.connection import connect_db
-from passari_workflow.db.models import (FreezeSource, MuseumObject,
-                                               MuseumPackage)
+from passari_workflow.db.models import MuseumObject, MuseumPackage
 from passari_workflow.jobs.submit_sip import submit_sip
-from passari_workflow.jobs.utils import job_locked_by_object_id
+from passari_workflow.jobs.utils import (freeze_running_object,
+                                         job_locked_by_object_id)
 from passari_workflow.queue.queues import QueueType, get_queue
-from passari.dpres.package import MuseumObjectPackage
 
 
 @job_locked_by_object_id
@@ -60,36 +56,18 @@ def create_sip(object_id, sip_id):
     # Run the 'create_sip' script
     try:
         museum_package = main(
-            object_id=int(object_id), package_dir=PACKAGE_DIR, sip_id=sip_id,
+            object_id=object_id, package_dir=PACKAGE_DIR, sip_id=sip_id,
             create_date=created_date, modify_date=modified_date,
             update=bool(modified_date)
         )
     except PreservationError as exc:
         # If a PreservationError was raised, freeze the object and prevent
         # the object from going further in the workflow.
-        with scoped_session() as db:
-            museum_object = (
-                db.query(MuseumObject)
-                .join(
-                    MuseumPackage,
-                    MuseumObject.latest_package_id == MuseumPackage.id
-                )
-                .filter(MuseumObject.id == object_id)
-                .one()
-            )
-
-            museum_object.frozen = True
-            museum_object.freeze_reason = exc.error
-            museum_object.freeze_source = FreezeSource.AUTOMATIC
-            museum_object.latest_package.cancelled = True
-
-            # Copy log files to the archive
-            museum_package = MuseumObjectPackage.from_path_sync(
-                Path(PACKAGE_DIR) / str(object_id), sip_id=sip_id
-            )
-            museum_package.copy_log_files_to_archive(ARCHIVE_DIR)
-
-            shutil.rmtree(museum_package.path)
+        freeze_running_object(
+            object_id=object_id,
+            sip_id=sip_id,
+            freeze_reason=exc.error
+        )
         return
     except OSError as exc:
         if exc.errno == errno.ENOSPC:
