@@ -131,12 +131,18 @@ def test_museum_package_identical_disallowed(
     ) in str(exc.value)
 
 
+@pytest.mark.parametrize("with_existing_package", [True, False])
 def test_preservation_error(
         session, download_object, monkeypatch, museum_packages_dir,
-        archive_dir, museum_object, museum_package_factory):
+        archive_dir, museum_object, museum_package_factory,
+        with_existing_package):
     """
     Test that encountering a PreservationError during a 'download_object'
-    job will freeze the object and remove the object from the workflow
+    job will freeze the object and remove the object from the workflow.
+
+    The test case has been parametrized with two different scenarios:
+    one where a MuseumObject already has one preserved package,
+    and a second one where no package has been created yet
     """
     def mock_download_object(object_id, package_dir, sip_id):
         raise PreservationError(
@@ -152,17 +158,19 @@ def test_preservation_error(
         mock_download_object
     )
 
-    # Create a museum package that was uploaded successfully earlier.
+    # For the test case with an existing package, create a museum package that
+    # was uploaded successfully earlier.
     # The PreservationError should *not* affect this package.
-    db_museum_package = museum_package_factory(
-        sip_filename="fake_package-testID2.tar",
-        created_date=datetime.datetime(
-            2018, 9, 1, 12, 0, 0, 0, tzinfo=datetime.timezone.utc
-        ),
-        preserved=True,
-        museum_object=museum_object
-    )
-    museum_object.latest_package = db_museum_package
+    if with_existing_package:
+        db_museum_package = museum_package_factory(
+            sip_filename="fake_package-testID2.tar",
+            created_date=datetime.datetime(
+                2018, 9, 1, 12, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
+            preserved=True,
+            museum_object=museum_object
+        )
+        museum_object.latest_package = db_museum_package
 
     session.commit()
 
@@ -178,11 +186,14 @@ def test_preservation_error(
     # The previous successful package was not updated.
     # This is because a new package is not created unless the 'download_object'
     # job is successful
-    latest_package = db_museum_object.latest_package
+    if with_existing_package:
+        latest_package = db_museum_object.latest_package
 
-    assert not latest_package.cancelled
-    assert latest_package.preserved
-    assert latest_package.sip_filename == "fake_package-testID2.tar"
+        assert not latest_package.cancelled
+        assert latest_package.preserved
+        assert latest_package.sip_filename == "fake_package-testID2.tar"
+    else:
+        assert not db_museum_object.latest_package
 
     # No new job was enqueued
     queue = get_queue(QueueType.CREATE_SIP)

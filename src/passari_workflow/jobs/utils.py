@@ -47,10 +47,6 @@ def freeze_running_object(object_id, sip_id, freeze_reason):
     with scoped_session() as db:
         museum_object = (
             db.query(MuseumObject)
-            .join(
-                MuseumPackage,
-                MuseumObject.latest_package_id == MuseumPackage.id
-            )
             .filter(MuseumObject.id == object_id)
             .one()
         )
