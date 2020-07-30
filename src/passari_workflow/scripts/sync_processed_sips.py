@@ -302,7 +302,7 @@ def sync_processed_sips(days):
 @click.option(
     # According to DPRES API docs, reports for rejected packages will preserved
     # for at least 10 days
-    "--days", default=11, help="Amount of days to search through")
+    "--days", default=31, help="Amount of days to search through")
 def cli(days):
     sync_processed_sips(days)
 
