@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1] - 2020-08-04
 ### Added
- - Add `deferred-enqueue-scripts` for enqueuing objects using a background RQ job.
+ - Add `deferred-enqueue-objects` script for enqueuing objects using a background RQ job.
 
 ### Changed
  - Increase default sync window for `sync-processed-sips` from 11 days to 31 days.
