@@ -20,11 +20,11 @@ Clone the *passari-workflow* repository and create a Python 3.6 virtualenv. Inst
 
    $ git clone https://github.com/finnish-heritage-agency/passari-workflow.git
    $ cd passari-workflow
-   $ git checkout 1.0 # newer version may be available, check with `git tag`
+   $ git checkout 1.1 # newer version may be available, check with `git tag`
    $ python3.6 -mvenv venv
    $ source venv/bin/activate
-   # Install Passari 1.0. Replace 1.0 with newer version if available.
-   $ pip install --upgrade git+https://github.com/finnish-heritage-agency/passari.git@1.0#egg=passari
+   # Install Passari 1.1. Replace 1.1 with newer version if available.
+   $ pip install --upgrade git+https://github.com/finnish-heritage-agency/passari.git@1.1#egg=passari
 
 Configure *Passari* as detailed in the documentation for that application; *Passari Workflow* itself is only responsible for handling the workflow. After this is done, you can install *Passari Workflow*:
 
